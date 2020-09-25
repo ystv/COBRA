@@ -1,0 +1,50 @@
+type Query {
+  helloWorld: String!
+  boas: [Boa]
+  boa(id: ID): Boa
+}
+
+type Mutation {
+  editBoa(
+    id: ID!
+    name: String
+    live: Boolean
+    videoOptions: String
+    customDestination: String
+    protocol: AllowedProtocols
+  ): Boa
+}
+
+type Boa {
+  id: ID!
+  name: String!
+  live: Boolean!
+  videoOptions: String
+  customDestination: String
+  protocol: AllowedProtocols!
+
+  state: AllowedStates!
+  signal: AllowedSignalStrength!
+}
+
+enum AllowedProtocols {
+  RTMP
+  SRT
+  RTP
+}
+
+enum AllowedSignalStrength {
+  GOOD
+  MED
+  POOR
+  BAD
+  NONE
+}
+
+enum AllowedStates {
+  STREAMING
+  WORKING
+  ERROR
+  ONLINE
+  OFFLINE
+}
