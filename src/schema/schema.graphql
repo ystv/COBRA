@@ -2,6 +2,7 @@ type Query {
   helloWorld: String!
   boas: [Boa]
   boa(id: ID): Boa
+  streams: StreamServers
 }
 
 type Mutation {
@@ -47,4 +48,92 @@ enum AllowedStates {
   ERROR
   ONLINE
   OFFLINE
+}
+
+enum ServerTypes {
+  STREAMING
+  WORKING
+  ERROR
+  ONLINE
+  OFFLINE
+}
+
+type StreamServers {
+  rtmp: RTMPServer
+}
+
+type RTMPServer {
+  nginx_version: String
+  nginx_rtmp_version: String
+  built: String
+  pid: Int
+  uptime: Int
+  naccepted: Int
+  bw_in: Int
+  bytes_in: Int
+  bw_out: Int
+  bytes_out: Int
+  server: Server
+}
+
+type Server {
+  application: [Application]
+}
+
+type Application {
+  name: String!
+  live: Live!
+}
+
+type Live {
+  stream: [Stream]
+  nclients: Int!
+}
+
+type Stream {
+  name: String
+  time: Int
+  bw_in: Int
+  bytes_in: Int
+  bw_out: Int
+  bytes_out: Int
+  bw_audio: Int
+  bw_video: Int
+  client: [Client]
+  meta: meta
+  nclients: Int
+  publishing: String
+  active: String
+}
+
+type meta {
+  video: video
+  audio: audio
+}
+
+type video {
+  width: Int
+  height: Int
+  frame_rate: Float
+  codec: String
+  profile: String
+  compat: Int
+  level: Float
+}
+
+type audio {
+  codec: String
+  profile: String
+  channels: Int
+  sample_rate: Int
+}
+
+type Client {
+  id: Int
+  address: String
+  time: Int
+  dropped: Int
+  avsync: Int
+  timestamp: Int
+  active: String
 }

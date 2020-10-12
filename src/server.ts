@@ -8,7 +8,7 @@ import schema from "./schema";
 const app = express();
 const server = new ApolloServer({
   schema,
-  validationRules: [depthLimit(7)],
+  validationRules: [depthLimit(10)],
 });
 app.use("*", cors());
 app.use(compression());
