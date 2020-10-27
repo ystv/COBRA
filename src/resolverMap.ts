@@ -126,14 +126,20 @@ const resolverMap: IResolvers = {
       _: void,
       args: { alias: string; start: string; end: string }
     ): {} {
-      // ADD CHECK FOR CLASH AND DATE VALIDATION
-      return genNoClashStreamKey().then((newKeyFound: any) => {
-        console.log(newKeyFound);
+      if (
+        validateDate(args.start) == false ||
+        validateDate(args.end) == false
+      ) {
+        throw new UserInputError("Date wrong format");
+      }
 
+      return genNoClashStreamKey().then((newKeyFound: any) => {
         var newKey = { streamKey: newKeyFound, ...args };
         return db("streamKeys")
           .insert(newKey)
-          .then((e: any) => newKey);
+          .then((e: any) => {
+            return newKey;
+          });
       });
     },
 
@@ -147,6 +153,13 @@ const resolverMap: IResolvers = {
         end: string;
       }
     ): {} {
+      if (
+        validateDate(args.start) == false ||
+        validateDate(args.end) == false
+      ) {
+        throw new UserInputError("Date wrong format");
+      }
+
       return checkClashStreamKey(args.streamKey).then((e) => {
         if (e !== false) {
           throw new UserInputError("ID exists already");
@@ -199,4 +212,13 @@ async function checkClashStreamKey(streamKey: string): Promise<boolean> {
         return false;
       }
     });
+}
+
+function validateDate(date: string): boolean {
+  var test = Date.parse(date);
+  if (new Date(test).toISOString().slice(0, 19).replace("T", " ") !== date) {
+    return false;
+  } else {
+    return true;
+  }
 }
