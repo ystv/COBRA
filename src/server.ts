@@ -44,6 +44,7 @@ app.post("/key-check", function (req, res) {
 });
 
 async function checkUserProfile(data: { name: string; pwd: string }) {
+  // ADD DATE CHECK
   return db
     .select("*")
     .from("streamKeys")
