@@ -3,6 +3,7 @@ type Query {
   boas: [Boa]
   boa(id: ID): Boa
   streams: StreamServers
+  streamKeys: [streamKeyObj]
 }
 
 type Mutation {
@@ -14,6 +15,26 @@ type Mutation {
     customDestination: String
     protocol: AllowedProtocols
   ): Boa
+
+  addStreamKey(
+    streamKey: String!
+    pwd: String
+    alias: String
+    start: String
+    end: String
+  ): streamKeyObj
+
+  genStreamKey(alias: String, start: String!, end: String!): streamKeyObj
+
+  editStreamKey(
+    streamKey: String!
+    pwd: String
+    alias: String
+    start: String
+    end: String
+  ): streamKeyObj
+
+  deleteStreamKey(streamKey: String!): streamKeyObj
 }
 
 type Boa {
@@ -136,4 +157,12 @@ type Client {
   avsync: Int
   timestamp: Int
   active: String
+}
+
+type streamKeyObj {
+  streamKey: String!
+  pwd: String
+  alias: String
+  start: String
+  end: String
 }
