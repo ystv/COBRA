@@ -88,12 +88,12 @@ type RTMPServer {
   nginx_rtmp_version: String
   built: String
   pid: Int
-  uptime: Int
+  uptime: Float
   naccepted: Int
-  bw_in: Int
-  bytes_in: Int
-  bw_out: Int
-  bytes_out: Int
+  bw_in: Float
+  bytes_in: Float
+  bw_out: Float
+  bytes_out: Float
   server: Server
 }
 
@@ -114,12 +114,12 @@ type Live {
 type Stream {
   name: String
   time: Int
-  bw_in: Int
-  bytes_in: Int
-  bw_out: Int
-  bytes_out: Int
-  bw_audio: Int
-  bw_video: Int
+  bw_in: Float
+  bytes_in: Float
+  bw_out: Float
+  bytes_out: Float
+  bw_audio: Float
+  bw_video: Float
   client: [Client]
   meta: meta
   nclients: Int
