@@ -1,8 +1,56 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
+import { gql, useSubscription } from "@apollo/client";
+
+const COMMENTS_SUBSCRIPTION = gql`
+  subscription {
+    streamsChanged {
+      rtmp {
+        uptime
+        server {
+          application {
+            name
+            live {
+              stream {
+                name
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 function App() {
+  const ServerStatus = useSubscription(COMMENTS_SUBSCRIPTION);
+
+  function LatestComment() {
+    return (
+      <>
+        {ServerStatus.loading || ServerStatus.error !== undefined ? (
+          <p>Loading</p>
+        ) : (
+          ServerStatus.data.streamsChanged.rtmp.server.application.map(
+            (e: any) => {
+              let res = <></>;
+              try {
+                res = e.live.stream.map((e: any) => <small>{e.name}</small>);
+              } catch {}
+              return (
+                <div>
+                  <h5>{e.name}</h5>
+                  {res}
+                </div>
+              );
+            }
+          )
+        )}
+      </>
+    );
+  }
+
   function TestAPI() {
     fetch("/graphql", {
       method: "POST",
@@ -16,19 +64,9 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-        <button onClick={TestAPI}></button>
+        {/* <p>{JSON.stringify(streamState)}</p> */}
+        {LatestComment()}
+        <button onClick={TestAPI}>Hello There (Test GQL)</button>
       </header>
     </div>
   );

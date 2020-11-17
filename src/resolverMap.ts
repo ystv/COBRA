@@ -1,5 +1,5 @@
 import { IResolvers } from "graphql-tools";
-import { UserInputError } from "apollo-server-express";
+import { UserInputError, PubSub } from "apollo-server-express";
 import axios from "axios";
 require("dotenv-flow").config();
 var parser = require("fast-xml-parser");
@@ -12,6 +12,8 @@ export var db = require("knex")({
   },
   useNullAsDefault: true,
 });
+
+export const pubsub = new PubSub();
 
 console.log("RTMP Server: ", process.env.RTMP);
 
@@ -55,42 +57,7 @@ const resolverMap: IResolvers = {
     // },
 
     streams(_: void, args: void): {} {
-      return axios
-        .get(RTMPSERVER)
-        .then((e) => {
-          var result = parser.parse(e.data, {
-            attributeNamePrefix: "@_",
-            attrNodeName: "attr", //default is 'false'
-            textNodeName: "#text",
-            ignoreAttributes: true,
-            ignoreNameSpace: false,
-            allowBooleanAttributes: false,
-            parseNodeValue: true,
-            parseAttributeValue: false,
-            trimValues: true,
-            cdataTagName: "__cdata", //default is 'false'
-            cdataPositionChar: "\\c",
-            parseTrueNumberOnly: false,
-            arrayMode: false,
-          });
-          result = { rtmp: result.rtmp };
-
-          var newStream = result.rtmp.server.application.map((e: any) => {
-            if (Array.isArray(e.live.stream)) {
-              return e;
-            } else {
-              var newObj: any = e;
-              newObj.live.stream = [e.live.stream];
-              return newObj;
-            }
-          });
-          var newSpec = result;
-          newSpec.rtmp.server.application = newStream;
-          return newSpec;
-        })
-        .catch(function (error) {
-          console.log(error);
-        });
+      return RTMPStreamUpdate();
     },
 
     streamKeys(_: void, args: void): {}[] {
@@ -176,6 +143,11 @@ const resolverMap: IResolvers = {
       });
     },
   },
+  Subscription: {
+    streamsChanged: {
+      subscribe: () => pubsub.asyncIterator("STREAMS_CHANGED"),
+    },
+  },
 };
 export default resolverMap;
 
@@ -223,4 +195,49 @@ function validateDate(date: string): boolean {
   } else {
     return true;
   }
+}
+
+export async function pollStreamServers() {
+  let newData = await RTMPStreamUpdate();
+  //console.log(newData);
+  pubsub.publish("STREAMS_CHANGED", { streamsChanged: newData });
+}
+
+function RTMPStreamUpdate() {
+  return axios
+    .get(RTMPSERVER)
+    .then((e) => {
+      var result = parser.parse(e.data, {
+        attributeNamePrefix: "@_",
+        attrNodeName: "attr", //default is 'false'
+        textNodeName: "#text",
+        ignoreAttributes: true,
+        ignoreNameSpace: false,
+        allowBooleanAttributes: false,
+        parseNodeValue: true,
+        parseAttributeValue: false,
+        trimValues: true,
+        cdataTagName: "__cdata", //default is 'false'
+        cdataPositionChar: "\\c",
+        parseTrueNumberOnly: false,
+        arrayMode: false,
+      });
+      result = { rtmp: result.rtmp };
+
+      var newStream = result.rtmp.server.application.map((e: any) => {
+        if (Array.isArray(e.live.stream)) {
+          return e;
+        } else {
+          var newObj: any = e;
+          newObj.live.stream = [e.live.stream];
+          return newObj;
+        }
+      });
+      var newSpec = result;
+      newSpec.rtmp.server.application = newStream;
+      return newSpec;
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
 }

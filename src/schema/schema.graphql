@@ -37,6 +37,10 @@ type Mutation {
   deleteStreamKey(streamKey: String!): streamKeyObj
 }
 
+type Subscription {
+  streamsChanged: StreamServers
+}
+
 type Boa {
   id: ID!
   name: String!

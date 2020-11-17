@@ -19,3 +19,5 @@ yarn client:dev - launches React development mode
 yarn server:dev - launches interactive server
 yarn client - builds just client
 yarn server - builds just server
+
+Be sure to set the environment variables in both the root of the project and in the client folder (the latter especially if you are running a live dev copy)
