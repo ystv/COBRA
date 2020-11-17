@@ -1,5 +1,5 @@
 type Query {
-  helloWorld: String!
+  helloThere: String!
   boas: [Boa]
   boa(id: ID): Boa
   streams: StreamServers

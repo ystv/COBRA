@@ -42,6 +42,10 @@ var RTMPSERVER = process.env.RTMP!;
 
 const resolverMap: IResolvers = {
   Query: {
+    helloThere() {
+      return "General Kenobi";
+    },
+
     // boas(_: void, args: void): {}[] {
     //   return BOArray;
     // },

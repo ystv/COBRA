@@ -52,17 +52,19 @@ app.use(express.urlencoded({ extended: true }));
 server.applyMiddleware({ app, path: "/graphql" });
 const httpServer = createServer(app);
 
-httpServer.listen({ port: 3000 }, (): void =>
+httpServer.listen({ port: 5000 }, (): void =>
   console.log(
     `\n🚀      GraphQL is now running on http://localhost:3000/graphql`
   )
 );
 
-app.use(express.static(path.join(__dirname, "build")));
+//if (process.env.NODE_ENV === "production") {
+app.use(express.static(path.join(__dirname, "client/build")));
 
 app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
+  res.sendFile(path.join(__dirname, "client/build", "index.html"));
 });
+//}
 
 app.post("/key-check", function (req, res) {
   try {
