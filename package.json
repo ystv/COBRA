@@ -5,8 +5,10 @@
   "main": "index.ts",
   "scripts": {
     "start": "node dist/server.js",
-    "build": "tsc -p . && ncp src/schema dist/schema",
-    "start:dev": "npm run build:dev",
+    "build": "tsc -p . && ncp src/schema dist/schema && yarn client",
+    "client:dev": "cd client && yarn start",
+    "client": "cd client && yarn install && yarn build",
+    "dev": "yarn build:dev",
     "build:dev": "nodemon src/server.ts --exec ts-node src/server.ts -e ts,graphql"
   },
   "keywords": [],

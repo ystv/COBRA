@@ -6,9 +6,13 @@ import { createServer } from "http";
 import compression from "compression";
 import cors from "cors";
 import jwt from "jsonwebtoken";
+const path = require("path");
 
 import schema from "./schema";
 import { db } from "./resolverMap";
+
+const secret: jwt.Secret = process.env.signing_key!;
+
 const app = express();
 const server = new ApolloServer({
   schema,
@@ -31,12 +35,12 @@ const server = new ApolloServer({
     // add the user to the context
     //return { user };
 
-    const secret: jwt.Secret = process.env.signing_key!;
-
     try {
       var decoded = jwt.verify(req.cookies.token, secret);
+      console.log(decoded);
       return decoded;
     } catch (error) {
+      console.log("nope");
       return null;
     }
   },
@@ -47,13 +51,17 @@ app.use(compression());
 app.use(express.urlencoded({ extended: true }));
 server.applyMiddleware({ app, path: "/graphql" });
 const httpServer = createServer(app);
+
 httpServer.listen({ port: 3000 }, (): void =>
   console.log(
     `\n🚀      GraphQL is now running on http://localhost:3000/graphql`
   )
 );
-app.get("/", function (req, res) {
-  res.send("Welcome Home");
+
+app.use(express.static(path.join(__dirname, "build")));
+
+app.get("/*", function (req, res) {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
 app.post("/key-check", function (req, res) {
