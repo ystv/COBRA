@@ -14,6 +14,11 @@ import {
 import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
 
+import { Layout, Menu, Breadcrumb } from "antd";
+import { tokenRefresh } from "./commonFunctions";
+
+const { Header, Content, Footer } = Layout;
+
 const httpLink = new HttpLink();
 
 const wsLink = new WebSocketLink({
@@ -43,7 +48,30 @@ const client = new ApolloClient({
 ReactDOM.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <App />
+      <Layout className="layout">
+        <Header className="light-header">
+          <div className="logo" />
+          <Menu mode="horizontal" defaultSelectedKeys={["1"]}>
+            <Menu.Item key="1">Stats</Menu.Item>
+            <Menu.Item disabled key="2">
+              StreamKeys
+            </Menu.Item>
+            <Menu.Item disabled key="3">
+              BOAs
+            </Menu.Item>
+            <Menu.Item disabled key="4">
+              ASPs
+            </Menu.Item>
+            <Menu.Item disabled key="5">
+              Relays
+            </Menu.Item>
+          </Menu>
+        </Header>
+        <App />
+        <Footer style={{ textAlign: "center" }}>
+          COBRA ©2020 Created by Ben Allen
+        </Footer>
+      </Layout>
     </ApolloProvider>
   </React.StrictMode>,
   document.getElementById("root")
@@ -53,3 +81,5 @@ ReactDOM.render(
 // to log results (for example: reportWebVitals(console.log))
 // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
+
+setInterval(tokenRefresh, 5 * 60000);

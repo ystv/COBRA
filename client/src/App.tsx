@@ -1,7 +1,12 @@
-import React, { useState } from "react";
-import logo from "./logo.svg";
+import React, { useEffect } from "react";
 import "./App.css";
 import { gql, useSubscription } from "@apollo/client";
+import { Card, Collapse, Spin, Typography, Statistic } from "antd";
+import {
+  formatBitPerSec,
+  ConvertMinutes,
+  tokenRefresh,
+} from "./commonFunctions";
 
 const COMMENTS_SUBSCRIPTION = gql`
   subscription {
@@ -14,6 +19,22 @@ const COMMENTS_SUBSCRIPTION = gql`
             live {
               stream {
                 name
+                bw_in
+                meta {
+                  video {
+                    width
+                    height
+                    frame_rate
+                    codec
+                  }
+                  audio {
+                    codec
+                    channels
+                    sample_rate
+                  }
+                }
+                time
+                nclients
               }
             }
           }
@@ -26,22 +47,55 @@ const COMMENTS_SUBSCRIPTION = gql`
 function App() {
   const ServerStatus = useSubscription(COMMENTS_SUBSCRIPTION);
 
+  useEffect(tokenRefresh, []);
+
   function LatestComment() {
     return (
       <>
         {ServerStatus.loading || ServerStatus.error !== undefined ? (
-          <p>Loading</p>
+          <Spin />
         ) : (
           ServerStatus.data.streamsChanged.rtmp.server.application.map(
             (e: any) => {
               let res = <></>;
               try {
-                res = e.live.stream.map((e: any) => <small>{e.name}</small>);
+                res = e.live.stream.map((stream: any) => (
+                  <Card className="Stream-Card">
+                    <small>{`${stream.meta.video.width}x${stream.meta.video.height} ${stream.meta.video.frame_rate}p`}</small>
+                    <Typography.Title
+                      level={3}
+                      copyable={{
+                        text: `rtmp://${process.env.REACT_APP_RTMP}/${e.name}/${stream.name}`,
+                      }}
+                    >
+                      {stream.name}
+                    </Typography.Title>
+                    <Statistic
+                      title="Time"
+                      value={ConvertMinutes(stream.time)}
+                    />
+                    <Statistic
+                      title="Connected Devices"
+                      value={stream.nclients}
+                    />
+                    <Statistic
+                      title="Bitrate In"
+                      value={formatBitPerSec(stream.bw_in)}
+                    />
+                    <br />
+                    <Collapse>
+                      <Collapse.Panel key="1" header="Stats">
+                        {JSON.stringify(stream)}
+                      </Collapse.Panel>
+                    </Collapse>
+                  </Card>
+                ));
               } catch {}
               return (
-                <div>
-                  <h5>{e.name}</h5>
-                  {res}
+                <div className="Stream-Application">
+                  <Typography.Title level={1}>{e.name}</Typography.Title>
+                  <div className="Stream-Cards">{res}</div>
+                  <br />
                 </div>
               );
             }
@@ -51,23 +105,9 @@ function App() {
     );
   }
 
-  function TestAPI() {
-    fetch("/graphql", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: "{ helloThere }" }),
-    })
-      .then((e) => e.json())
-      .then((e) => console.log(e.data.helloThere));
-  }
-
   return (
     <div className="App">
-      <header className="App-header">
-        {/* <p>{JSON.stringify(streamState)}</p> */}
-        {LatestComment()}
-        <button onClick={TestAPI}>Hello There (Test GQL)</button>
-      </header>
+      <div className="App-Content">{LatestComment()}</div>
     </div>
   );
 }

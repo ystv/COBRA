@@ -20,13 +20,7 @@ const server = new ApolloServer({
   validationRules: [depthLimit(10)],
   context: (reqobj) => {
     if (!reqobj.connection?.context.user) {
-      try {
-        var token = reqobj.req.cookies.token;
-        var decoded = jwt.verify(token, secret);
-        return { user: decoded };
-      } catch (error) {
-        throw new AuthenticationError("Couldn't authenticate HTTP cookie");
-      }
+      return checkAuthCookie(reqobj.req.cookies.token);
     }
   },
   playground: {
@@ -41,12 +35,7 @@ const server = new ApolloServer({
         .pop()
         ?.split(";")[0];
       if (wsCookie) {
-        try {
-          var decoded = jwt.verify(wsCookie, secret);
-          return { user: decoded };
-        } catch (error) {
-          throw new AuthenticationError("Couldn't authenticate socket cookie");
-        }
+        return checkAuthCookie(wsCookie);
       }
 
       throw new Error("Missing cookie in socket!");
@@ -96,18 +85,68 @@ app.post("/key-check", function (req, res) {
 });
 
 async function checkUserProfile(data: { name: string; pwd: string }) {
-  // ADD DATE CHECK
   return db
     .select("*")
     .from("streamKeys")
     .where({ streamKey: data.name })
     .first()
     .then((rows: any) => {
-      if (rows.pwd == data.pwd) {
-        return true;
+      try {
+        if (rows.pwd == data.pwd) {
+          if (rows.start == null && rows.end == null) {
+            console.log("no date");
+            return true;
+          } else {
+            console.log(
+              "date now: ",
+              Date.now(),
+              " date start: ",
+              Date.parse(rows.start),
+              " date end: ",
+              Date.parse(rows.end)
+            );
+            if (rows.start !== null && rows.end !== null) {
+              if (
+                Date.parse(rows.start) < Date.now() &&
+                Date.parse(rows.end) > Date.now()
+              ) {
+                return true;
+              } else {
+                return false;
+              }
+            } else if (rows.start == null && rows.end !== null) {
+              if (Date.parse(rows.end) > Date.now()) {
+                return true;
+              } else {
+                return false;
+              }
+            } else if (rows.start !== null && rows.end == null) {
+              if (Date.parse(rows.start) < Date.now()) {
+                return true;
+              } else {
+                return false;
+              }
+            } else {
+              return false;
+            }
+          }
+        }
+        return false;
+      } catch {
+        return false;
       }
-      return false;
     });
 }
 
-setInterval(pollStreamServers, 2000);
+setInterval(pollStreamServers, 1000);
+
+function checkAuthCookie(token: any) {
+  try {
+    var decoded: any = jwt.verify(token, secret);
+    if (decoded.perms.find((o: any) => o.name === "SuperUser") == undefined)
+      throw new AuthenticationError("Incorrect Permissions");
+    return { user: decoded };
+  } catch (error) {
+    throw new AuthenticationError("Couldn't authenticate socket cookie");
+  }
+}

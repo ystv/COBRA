@@ -8,7 +8,7 @@ const cryptoRandomString = require("crypto-random-string");
 export var db = require("knex")({
   client: "sqlite3",
   connection: {
-    filename: "./cobra.sqlite",
+    filename: process.env.dblocation,
   },
   useNullAsDefault: true,
 });
@@ -189,6 +189,7 @@ async function checkClashStreamKey(streamKey: string): Promise<boolean> {
 
 function validateDate(date: string): boolean {
   // Required format = "2008-11-11 13:23:44"
+  if (date == null) return true;
   var test = Date.parse(date);
   if (new Date(test).toISOString().slice(0, 19).replace("T", " ") !== date) {
     return false;
