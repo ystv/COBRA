@@ -48,18 +48,18 @@ function Stats() {
 
   useEffect(tokenRefresh, []);
 
-  function LatestComment() {
+  function ListStats() {
     return (
       <>
         {ServerStatus.loading || ServerStatus.error !== undefined ? (
           <Spin />
         ) : (
           ServerStatus.data.streamsChanged.rtmp.server.application.map(
-            (e: any) => {
+            (e: any, i: number) => {
               let res = <></>;
               try {
-                res = e.live.stream.map((stream: any) => (
-                  <Card className="Stream-Card">
+                res = e.live.stream.map((stream: any, i: number) => (
+                  <Card className="Stream-Card" key={i}>
                     <small>{`${stream.meta.video.width}x${stream.meta.video.height} ${stream.meta.video.frame_rate}p`}</small>
                     <Typography.Title
                       level={3}
@@ -91,7 +91,7 @@ function Stats() {
                 ));
               } catch {}
               return (
-                <div className="Stream-Application">
+                <div className="Stream-Application" key={i}>
                   <Typography.Title level={3}>{e.name}</Typography.Title>
                   <div className="Stream-Cards">{res}</div>
                   <br />
@@ -108,7 +108,7 @@ function Stats() {
     <div className="App">
       <div className="App-Content">
         <Typography.Title level={2}>Stats</Typography.Title>
-        {LatestComment()}
+        {ListStats()}
       </div>
     </div>
   );

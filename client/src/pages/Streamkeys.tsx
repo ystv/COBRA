@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { gql, QueryResult, useQuery, useMutation } from "@apollo/client";
 import {
-  Spin,
   Typography,
   Tabs,
   Button,
   Table,
   Form,
   Input,
-  Checkbox,
+  Space,
   DatePicker,
 } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
+import { ReloadOutlined, DeleteOutlined } from "@ant-design/icons";
 import { tokenRefresh } from "../commonFunctions";
 import { TableRowSelection } from "antd/lib/table/interface";
 import { setConstantValue } from "typescript";
@@ -58,17 +57,115 @@ export default function Streamkeys() {
           />
         </TabPane>
         <TabPane tab="Generate Temp Key" key="2">
-          <GenerateTempKeyColumn />
+          <GenerateTempKeyTab />
         </TabPane>
         <TabPane tab="Manually Add Key" key="3">
-          Content of Tab Pane 3
+          <AddKeyTab />
         </TabPane>
       </Tabs>
     </div>
   );
 }
 
-function GenerateTempKeyColumn() {
+function AddKeyTab() {
+  const ADD_KEY = gql`
+    mutation(
+      $streamKey: String!
+      $pwd: String
+      $alias: String
+      $start: String
+      $end: String
+    ) {
+      addStreamKey(
+        streamKey: $streamKey
+        pwd: $pwd
+        alias: $alias
+        start: $start
+        end: $end
+      ) {
+        streamKey
+        pwd
+      }
+    }
+  `;
+  const [addStreamKey, { data, error }] = useMutation(ADD_KEY);
+
+  const layout = {
+    labelCol: { span: 2 },
+    wrapperCol: { span: 6 },
+  };
+  const tailLayout = {
+    wrapperCol: { offset: 2, span: 6 },
+  };
+
+  const onFinish = (values: any) => {
+    console.log("Success:", values);
+    addStreamKey({ variables: values }).catch((e) => console.log(e));
+  };
+
+  return (
+    <Form
+      {...layout}
+      name="basic"
+      initialValues={{ remember: true }}
+      onFinish={onFinish}
+    >
+      <Form.Item
+        label="Stream Key"
+        name="streamKey"
+        rules={[{ required: true, message: "Please enter Stream Key!" }]}
+      >
+        <Input />
+      </Form.Item>
+
+      <Form.Item label="Alias" name="alias">
+        <Input />
+      </Form.Item>
+
+      <Typography.Paragraph>
+        A password will be generated for you if left blank.
+      </Typography.Paragraph>
+
+      <Form.Item label="Password" name="pwd">
+        <Input />
+      </Form.Item>
+
+      <Form.Item label="Start Date" name="start">
+        <DatePicker
+          showTime={{ format: "HH:mm:ss" }}
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+      </Form.Item>
+
+      <Form.Item label="End Date" name="end">
+        <DatePicker
+          showTime={{ format: "HH:mm:ss" }}
+          format="YYYY-MM-DD HH:mm:ss"
+        />
+      </Form.Item>
+
+      <Form.Item {...tailLayout}>
+        <Button type="primary" htmlType="submit">
+          Submit
+        </Button>
+      </Form.Item>
+      {data !== undefined ? (
+        <Typography.Link copyable>
+          {`${data.addStreamKey.streamKey}?pwd=${data.addStreamKey.pwd}`}
+        </Typography.Link>
+      ) : (
+        <></>
+      )}
+      {error !== undefined ? (
+        <Typography.Paragraph>An Error Occured</Typography.Paragraph>
+      ) : (
+        <></>
+      )}
+    </Form>
+  );
+}
+
+function GenerateTempKeyTab() {
   const GEN_KEY = gql`
     mutation($alias: String, $start: String!, $end: String!) {
       genStreamKey(alias: $alias, start: $start, end: $end) {
@@ -76,7 +173,7 @@ function GenerateTempKeyColumn() {
       }
     }
   `;
-  const [genStreamKey, { data }] = useMutation(GEN_KEY);
+  const [genStreamKey, { data, error }] = useMutation(GEN_KEY);
 
   const layout = {
     labelCol: { span: 2 },
@@ -96,17 +193,12 @@ function GenerateTempKeyColumn() {
     genStreamKey({ variables: formattedFormData });
   };
 
-  const onFinishFailed = (errorInfo: any) => {
-    console.log("Failed:", errorInfo);
-  };
-
   return (
     <Form
       {...layout}
       name="basic"
       initialValues={{ remember: true }}
       onFinish={onFinish}
-      onFinishFailed={onFinishFailed}
     >
       <Form.Item label="Alias" name="alias">
         <Input />
@@ -137,6 +229,11 @@ function GenerateTempKeyColumn() {
       ) : (
         <></>
       )}
+      {error !== undefined ? (
+        <Typography.Paragraph>An Error Occured</Typography.Paragraph>
+      ) : (
+        <></>
+      )}
     </Form>
   );
 }
@@ -150,13 +247,25 @@ function KeysDisplay({
   onClickRefreshHandler,
   StreamKeys,
 }: KeysDisplayInterface) {
-  const rowSelection = {
+  const [permakeysSelected, setPermakeysSelected] = useState([]);
+  const [tempkeysSelected, setTempkeysSelected] = useState([]);
+
+  const DELETE_KEY = gql`
+    mutation($streamKey: String!) {
+      deleteStreamKey(streamKey: $streamKey)
+    }
+  `;
+
+  const [deleteStreamKey, { data, error }] = useMutation(DELETE_KEY);
+
+  const rowSelectionPerm = {
     onChange: (selectedRowKeys: any, selectedRows: any) => {
       console.log(
         `selectedRowKeys: ${selectedRowKeys}`,
         "selectedRows: ",
         selectedRows
       );
+      setPermakeysSelected(selectedRows);
     },
     getCheckboxProps: (record: any) => {
       return {
@@ -165,21 +274,62 @@ function KeysDisplay({
       };
     },
   };
+
+  const rowSelectionTemp = {
+    onChange: (selectedRowKeys: any, selectedRows: any) => {
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        "selectedRows: ",
+        selectedRows
+      );
+      setTempkeysSelected(selectedRows);
+    },
+    getCheckboxProps: (record: any) => {
+      return {
+        value: record.streamKey,
+        label: record.streamKey,
+      };
+    },
+  };
+
+  function handleDeleteSelected() {
+    permakeysSelected.forEach((e: any) =>
+      deleteStreamKey({ variables: { streamKey: e.streamKey } })
+    );
+
+    tempkeysSelected.forEach((e: any) =>
+      deleteStreamKey({ variables: { streamKey: e.streamKey } })
+    );
+
+    onClickRefreshHandler();
+  }
+
   return (
     <>
-      <Button
-        type="primary"
-        shape="circle"
-        icon={<ReloadOutlined />}
-        onClick={() => onClickRefreshHandler()}
-      />
+      <Space align="end" style={{ width: "100%", justifyContent: "flex-end" }}>
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<ReloadOutlined />}
+          onClick={() => onClickRefreshHandler()}
+        />
+        <Button
+          type="primary"
+          shape="round"
+          icon={<DeleteOutlined />}
+          danger
+          onClick={() => handleDeleteSelected()}
+        >
+          Delete
+        </Button>
+      </Space>
       <>
         <Typography.Title level={3}>Permakeys</Typography.Title>
         <Table
           loading={StreamKeys.loading || StreamKeys.error !== undefined}
           rowSelection={{
             type: "checkbox",
-            ...rowSelection,
+            ...rowSelectionPerm,
           }}
           rowKey="streamKey"
           columns={columns}
@@ -194,7 +344,7 @@ function KeysDisplay({
         <Table
           rowSelection={{
             type: "checkbox",
-            ...rowSelection,
+            ...rowSelectionTemp,
           }}
           rowKey="streamKey"
           columns={columns.filter((e) => e.dataIndex !== "pwd")}

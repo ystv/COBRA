@@ -111,6 +111,19 @@ const resolverMap: IResolvers = {
       });
     },
 
+    deleteStreamKey(
+      _: void,
+      args: {
+        streamKey: string;
+      }
+    ): boolean {
+      return db("streamKeys")
+        .where("streamKey", args.streamKey)
+        .del()
+        .then((e: any) => true)
+        .catch((e: any) => false);
+    },
+
     addStreamKey(
       _: void,
       args: {

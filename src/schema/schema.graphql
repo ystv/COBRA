@@ -26,15 +26,15 @@ type Mutation {
 
   genStreamKey(alias: String, start: String!, end: String!): streamKeyObj
 
-  editStreamKey(
-    streamKey: String!
-    pwd: String
-    alias: String
-    start: String
-    end: String
-  ): streamKeyObj
+  # editStreamKey(
+  #   streamKey: String!
+  #   pwd: String
+  #   alias: String
+  #   start: String
+  #   end: String
+  # ): streamKeyObj
 
-  deleteStreamKey(streamKey: String!): streamKeyObj
+  deleteStreamKey(streamKey: String!): Boolean
 }
 
 type Subscription {
