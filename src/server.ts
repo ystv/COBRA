@@ -54,15 +54,15 @@ server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen({ port: 5000 }, (): void =>
   console.log(
-    `\n🚀      GraphQL is now running on http://localhost:3000/graphql`
+    `\n🚀      GraphQL is now running on http://localhost:5000/graphql`
   )
 );
 
 //if (process.env.NODE_ENV === "production") {
-app.use(express.static(path.join(__dirname, "client/build")));
+app.use(express.static(path.join(__dirname, "../client/build")));
 
 app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "client/build", "index.html"));
+  res.sendFile(path.join(__dirname, "../client/build", "index.html"));
 });
 //}
 
