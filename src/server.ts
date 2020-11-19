@@ -52,9 +52,9 @@ server.applyMiddleware({ app, path: "/graphql" });
 const httpServer = createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
-httpServer.listen({ port: 5000 }, (): void =>
+httpServer.listen({ port: process.env.PORT }, (): void =>
   console.log(
-    `\n🚀      GraphQL is now running on http://localhost:5000/graphql`
+    `\n🚀      GraphQL is now running on http://localhost:${process.env.PORT}/graphql`
   )
 );
 
