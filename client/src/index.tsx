@@ -3,6 +3,13 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
 
 import {
   split,
@@ -13,11 +20,7 @@ import {
 } from "@apollo/client";
 import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
-
-import { Layout, Menu, Breadcrumb } from "antd";
 import { tokenRefresh } from "./commonFunctions";
-
-const { Header, Content, Footer } = Layout;
 
 const httpLink = new HttpLink();
 
@@ -48,30 +51,9 @@ const client = new ApolloClient({
 ReactDOM.render(
   <React.StrictMode>
     <ApolloProvider client={client}>
-      <Layout className="layout">
-        <Header className="light-header">
-          <div className="logo" />
-          <Menu mode="horizontal" defaultSelectedKeys={["1"]}>
-            <Menu.Item key="1">Stats</Menu.Item>
-            <Menu.Item disabled key="2">
-              StreamKeys
-            </Menu.Item>
-            <Menu.Item disabled key="3">
-              BOAs
-            </Menu.Item>
-            <Menu.Item disabled key="4">
-              ASPs
-            </Menu.Item>
-            <Menu.Item disabled key="5">
-              Relays
-            </Menu.Item>
-          </Menu>
-        </Header>
+      <Router>
         <App />
-        <Footer style={{ textAlign: "center" }}>
-          COBRA ©2020 Created by Ben Allen
-        </Footer>
-      </Layout>
+      </Router>
     </ApolloProvider>
   </React.StrictMode>,
   document.getElementById("root")

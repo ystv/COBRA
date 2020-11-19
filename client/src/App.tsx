@@ -1,115 +1,82 @@
 import React, { useEffect } from "react";
 import "./App.css";
-import { gql, useSubscription } from "@apollo/client";
-import { Card, Collapse, Spin, Typography, Statistic } from "antd";
+import { tokenRefresh } from "./commonFunctions";
 import {
-  formatBitPerSec,
-  ConvertMinutes,
-  tokenRefresh,
-} from "./commonFunctions";
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
+import Stats from "./pages/Stats";
+import { Layout, Menu, Breadcrumb } from "antd";
+import Streamkeys from "./pages/Streamkeys";
+import { Stream } from "stream";
 
-const COMMENTS_SUBSCRIPTION = gql`
-  subscription {
-    streamsChanged {
-      rtmp {
-        uptime
-        server {
-          application {
-            name
-            live {
-              stream {
-                name
-                bw_in
-                meta {
-                  video {
-                    width
-                    height
-                    frame_rate
-                    codec
-                  }
-                  audio {
-                    codec
-                    channels
-                    sample_rate
-                  }
-                }
-                time
-                nclients
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
+const { Header, Content, Footer } = Layout;
 
 function App() {
-  const ServerStatus = useSubscription(COMMENTS_SUBSCRIPTION);
-
   useEffect(tokenRefresh, []);
+  const loc = useLocation();
 
-  function LatestComment() {
-    return (
-      <>
-        {ServerStatus.loading || ServerStatus.error !== undefined ? (
-          <Spin />
-        ) : (
-          ServerStatus.data.streamsChanged.rtmp.server.application.map(
-            (e: any) => {
-              let res = <></>;
-              try {
-                res = e.live.stream.map((stream: any) => (
-                  <Card className="Stream-Card">
-                    <small>{`${stream.meta.video.width}x${stream.meta.video.height} ${stream.meta.video.frame_rate}p`}</small>
-                    <Typography.Title
-                      level={3}
-                      copyable={{
-                        text: `rtmp://${process.env.REACT_APP_RTMP}/${e.name}/${stream.name}`,
-                      }}
-                    >
-                      {stream.name}
-                    </Typography.Title>
-                    <Statistic
-                      title="Time"
-                      value={ConvertMinutes(stream.time)}
-                    />
-                    <Statistic
-                      title="Connected Devices"
-                      value={stream.nclients}
-                    />
-                    <Statistic
-                      title="Bitrate In"
-                      value={formatBitPerSec(stream.bw_in)}
-                    />
-                    <br />
-                    <Collapse>
-                      <Collapse.Panel key="1" header="Stats">
-                        {JSON.stringify(stream)}
-                      </Collapse.Panel>
-                    </Collapse>
-                  </Card>
-                ));
-              } catch {}
-              return (
-                <div className="Stream-Application">
-                  <Typography.Title level={1}>{e.name}</Typography.Title>
-                  <div className="Stream-Cards">{res}</div>
-                  <br />
-                </div>
-              );
-            }
-          )
-        )}
-      </>
-    );
+  function defaultSelectedKey() {
+    switch (loc.pathname) {
+      case "/streamkeys":
+        return ["2"];
+        break;
+
+      default:
+        return ["1"];
+        break;
+    }
+
+    return ["1"];
   }
 
   return (
-    <div className="App">
-      <div className="App-Content">{LatestComment()}</div>
-    </div>
+    <Layout>
+      <Header className="light-header">
+        <div className="logo" />
+        <Menu mode="horizontal" defaultSelectedKeys={defaultSelectedKey()}>
+          <Menu.Item key="1">
+            <Link to="/">Stats</Link>
+          </Menu.Item>
+          <Menu.Item key="2">
+            <Link to="/streamkeys">StreamKeys</Link>
+          </Menu.Item>
+          <Menu.Item disabled key="3">
+            BOAs
+          </Menu.Item>
+          <Menu.Item disabled key="4">
+            ASPs
+          </Menu.Item>
+          <Menu.Item disabled key="5">
+            Relays
+          </Menu.Item>
+        </Menu>
+      </Header>
+
+      <div className="App-Container">
+        <div className="App-Content">
+          <Switch>
+            <Route path="/streamkeys">
+              <Streamkeys />
+            </Route>
+            <Route path="/">
+              <Stats />
+            </Route>
+          </Switch>
+        </div>
+      </div>
+      <Footer style={{ textAlign: "center" }}>
+        COBRA ©2020 Created by Ben Allen
+      </Footer>
+    </Layout>
   );
+}
+
+function Users() {
+  return <h2>Users</h2>;
 }
 
 export default App;
