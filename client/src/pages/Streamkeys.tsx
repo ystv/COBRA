@@ -147,7 +147,7 @@ function AddKeyTab() {
       </Form.Item>
       {data !== undefined ? (
         <Typography.Link copyable>
-          {`${data.addStreamKey.streamKey}?pwd=${data.addStreamKey.pwd}`}
+          {`rtmp://${process.env.REACT_APP_RTMP}/${process.env.REACT_APP_RTMP_INPUT_APPLICATION}/${data.addStreamKey.streamKey}?pwd=${data.addStreamKey.pwd}`}
         </Typography.Link>
       ) : (
         <></>
@@ -220,7 +220,7 @@ function GenerateTempKeyTab() {
       </Form.Item>
       {data !== undefined ? (
         <Typography.Link copyable>
-          {data.genStreamKey.streamKey}
+          {`rtmp://${process.env.REACT_APP_RTMP}/${process.env.REACT_APP_RTMP_INPUT_APPLICATION}/${data.genStreamKey.streamKey}`}
         </Typography.Link>
       ) : (
         <></>
@@ -360,14 +360,18 @@ const columns = [
   {
     title: "Stream Key",
     dataIndex: "streamKey",
-    render: (text: any) => (
-      <Typography.Link
-      // copyable={{
-      //   text: `rtmp://${process.env.REACT_APP_RTMP}/${process.env.REACT_APP_RTMP_INPUT_APPLICATION}/${text}`,
-      // }}   //ADD PWD SUPPORT TOO
-      >
-        {text}
-      </Typography.Link>
+    render: (text: any, record: any) => (
+      <>
+        <Typography.Link
+          copyable={{
+            text: `rtmp://${process.env.REACT_APP_RTMP}/${
+              process.env.REACT_APP_RTMP_INPUT_APPLICATION
+            }/${text}${record.pwd !== null ? `?pwd=${record.pwd}` : ""}`,
+          }} //ADD PWD SUPPORT TOO
+        >
+          {text}
+        </Typography.Link>
+      </>
     ),
   },
   {
