@@ -4,3 +4,4 @@ cobraLocal.sqlite
 client/node_modules
 client/build
 dist
+ecosystem.config.js

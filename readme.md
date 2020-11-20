@@ -32,6 +32,8 @@ Similarly with the admin interface, this does not natively support https yet so 
 Finally this is very alpha software right now, more development is intended but use in production at your own risk.
 
 ## Setup
+Requires yarn
+
 Modify nginx config...(more details later)
 
 send nginx rtmp on_publish to {address}/key-check

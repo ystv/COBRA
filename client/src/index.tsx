@@ -22,10 +22,16 @@ import { getMainDefinition } from "@apollo/client/utilities";
 import { WebSocketLink } from "@apollo/client/link/ws";
 import { tokenRefresh } from "./commonFunctions";
 
-const httpLink = new HttpLink();
+const httpLink = new HttpLink({
+  uri: `http${process.env.REACT_APP_API ? "s" : ""}://${
+    process.env.REACT_APP_API
+  }/graphql/`,
+});
 
 const wsLink = new WebSocketLink({
-  uri: `ws://${process.env.REACT_APP_API}/graphql`,
+  uri: `ws${process.env.REACT_APP_API ? "s" : ""}://${
+    process.env.REACT_APP_API
+  }/graphql`,
   options: {
     reconnect: true,
   },

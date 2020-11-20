@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "yarn server && yarn client",
-    "server": "tsc -p . && ncp src/schema dist/schema",
+    "server": "yarn install && tsc -p . && ncp src/schema dist/schema",
     "client:dev": "cd client && yarn install && yarn start",
     "client": "cd client && yarn install && yarn build",
     "dev": "concurrently --kill-others-on-fail \"yarn server:dev\" \"yarn client:dev\"",
