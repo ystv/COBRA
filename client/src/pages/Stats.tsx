@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { gql, useSubscription } from "@apollo/client";
 import { Card, Collapse, Spin, Typography, Statistic } from "antd";
 import {
@@ -45,8 +45,6 @@ const COMMENTS_SUBSCRIPTION = gql`
 
 function Stats() {
   const ServerStatus = useSubscription(COMMENTS_SUBSCRIPTION);
-
-  useEffect(tokenRefresh, []);
 
   function ListStats() {
     return (

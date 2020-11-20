@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { gql, QueryResult, useQuery, useMutation } from "@apollo/client";
 import {
   Typography,
@@ -36,10 +36,6 @@ export default function Streamkeys() {
   function onClickRefreshHandler() {
     StreamKeys.refetch();
   }
-
-  useEffect(() => {
-    tokenRefresh();
-  }, []);
 
   return (
     <div>
