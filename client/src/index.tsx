@@ -29,7 +29,7 @@ import { tokenRefresh } from "./commonFunctions";
 const httpLink = new HttpLink();
 
 const wsLink = new WebSocketLink({
-  uri: `ws${process.env.REACT_APP_API == "true" ? "s" : ""}://${
+  uri: `ws${process.env.REACT_APP_SECURE == "true" ? "s" : ""}://${
     process.env.REACT_APP_API
   }/graphql`,
   options: {
