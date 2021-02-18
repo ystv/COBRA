@@ -5,3 +5,4 @@ client/node_modules
 client/build
 dist
 ecosystem.config.js
+.DS_Store

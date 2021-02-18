@@ -1,5 +1,6 @@
 import express from "express";
 var cookieParser = require("cookie-parser");
+var cookieString = require('cookie');
 import { ApolloServer, AuthenticationError } from "apollo-server-express";
 import depthLimit from "graphql-depth-limit";
 import { createServer } from "http";
@@ -30,10 +31,12 @@ const server = new ApolloServer({
   },
   subscriptions: {
     onConnect: (connectionParams: any, webSocket, context) => {
-      var wsCookie = context.request.headers.cookie
-        ?.split("token=")
-        .pop()
-        ?.split(";")[0];
+      // var wsCookie = context.request.headers.cookie
+      //   ?.split("token=")
+      //   .pop()
+      //   ?.split(";")[0];
+      let cookieObj = cookieString.parse(context.request.headers.cookie);
+      let wsCookie = cookieObj.token;
       if (wsCookie) {
         return checkAuthCookie(wsCookie);
       }
