@@ -47,6 +47,7 @@
     "fast-xml-parser": "3.18.0",
     "graphql": "15.5.0",
     "http": "0.0.1-security",
+    "ini": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "knex": "0.21.17",
     "ncp": "^2.0.0",
