@@ -36,8 +36,8 @@ export function ConvertMinutes(num: any) {
   num = Math.floor(num / 1000);
 
   let d = Math.floor((num / 60 / 60 / 24));
-  let h = Math.floor((num / 60 / 60));
-  let m = Math.floor((num / 60));
+  let h = Math.floor((num / 60 / 60) % 24);
+  let m = Math.floor((num / 60) % 60);
   let s = Math.round(num % 60);
 
   return `${d != 0 ? d + ":" : ""}${
