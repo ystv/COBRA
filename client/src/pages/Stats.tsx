@@ -65,8 +65,11 @@ function Stats() {
                         text: `rtmp://${process.env.REACT_APP_RTMP}/${e.name}/${stream.name}`,
                       }}
                     >
-                      {stream.name}
+                      {stream.alias ? stream.alias : stream.name}
                     </Typography.Title>
+                    <small>
+                      {stream.alias ? `Key: ${stream.name}` : "No alias"}
+                    </small>
                     <Statistic
                       title="Time"
                       value={ConvertMinutes(stream.time)}
