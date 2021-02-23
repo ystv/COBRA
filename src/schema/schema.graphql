@@ -53,6 +53,13 @@ type Boa {
   signal: AllowedSignalStrength!
 }
 
+type SRT {
+  name: String!
+  url: String!
+  clients: Int
+  created: String!
+}
+
 enum AllowedProtocols {
   RTMP
   SRT
