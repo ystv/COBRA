@@ -6,3 +6,4 @@ client/build
 dist
 ecosystem.config.js
 .DS_Store
+.idea
