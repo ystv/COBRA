@@ -1,5 +1,7 @@
 # COBRA
 
+DEPRACATED MONOREPO IN FAVOUR OF SEPARATED SERVER AND CLIENT REPOS
+
 - [COBRA](#cobra)
   - [About](#about)
   - [WARNING](#warning)
